@@ -1,2 +1,0 @@
-matplotlib
-flask_socketio
