@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>PoS Fork Simulator – Stake Voting</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f8fafc;
+            color: #0f172a;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #1d4ed8;
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 10px 18px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        h2 {
+            margin-top: 20px;
+            color: #1e293b;
+        }
+
+        .card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            margin-bottom: 18px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            background: white;
+        }
+
+        th, td {
+            border: 1px solid #cbd5f5;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background: #e0e7ff;
+            color: #1e3a8a;
+        }
+
+        tr:nth-child(even) {
+            background: #f1f5f9;
+        }
+
+        .chain {
+            font-weight: bold;
+            background: #dcfce7;
+            padding: 10px;
+            border-radius: 8px;
+            color: #166534;
+        }
+
+        .muted {
+            color: #64748b;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>⚡ PoS Fork Simulator – Stake Voting</h1>
+
+<button onclick="simulate()">Run Simulation</button>
+
+<div class="card">
+    <h2>👥 Validators, Stake & Fork Choice</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Validator</th>
+                <th>Stake</th>
+                <th>Latency A1</th>
+                <th>Latency B1</th>
+                <th>Voted Branch</th>
+            </tr>
+        </thead>
+        <tbody id="validatorTable"></tbody>
+    </table>
+</div>
+
+<div class="card">
+    <h2>📊 Stake per Branch</h2>
+    <p>A1 stake: <b><span id="stakeA">0</span></b></p>
+    <p>B1 stake: <b><span id="stakeB">0</span></b></p>
+    <p>Canonical tip (by stake): <b><span id="canonicalTip">-</span></b></p>
+    <p>Loser branch: <span id="loserTip" class="muted">-</span></p>
+</div>
+
+<div class="card">
+    <h2>✅ Canonical Chain (before C2)</h2>
+    <div id="canonicalChain" class="chain">-</div>
+</div>
+
+<div class="card">
+    <h2>⛏️ Block C2 on Canonical Branch</h2>
+    <p>Chosen validator for C2: <b><span id="c2Validator">-</span></b></p>
+    <p>C2 parent: <b><span id="c2Parent">-</span></b></p>
+    <h3>⛓️ Final Chain (after C2)</h3>
+    <div id="finalChain" class="chain">-</div>
+</div>
+
+<script>
+async function simulate() {
+    const res = await fetch("/fork_pos/simulate", { method: "POST" });
+    const data = await res.json();
+
+    // ===== Validators table =====
+    const vTable = document.getElementById("validatorTable");
+    vTable.innerHTML = "";
+
+    data.validators.forEach(v => {
+        vTable.innerHTML += `
+            <tr>
+                <td>${v.name}</td>
+                <td>${v.stake}</td>
+                <td>${v.latA.toFixed(3)}</td>
+                <td>${v.latB.toFixed(3)}</td>
+                <td><b>${v.choice}</b></td>
+            </tr>
+        `;
+    });
+
+    // ===== Stake per branch =====
+    document.getElementById("stakeA").innerText = data.stakeA;
+    document.getElementById("stakeB").innerText = data.stakeB;
+    document.getElementById("canonicalTip").innerText = data.canonical_tip;
+    document.getElementById("loserTip").innerText = data.loser_tip;
+
+    // ===== Canonical chain =====
+    document.getElementById("canonicalChain").innerText =
+        data.canonical_chain.join(" → ");
+
+    // ===== C2 info & final chain =====
+    document.getElementById("c2Validator").innerText = data.c2_validator;
+    document.getElementById("c2Parent").innerText = data.c2_parent;
+    document.getElementById("finalChain").innerText =
+        data.final_chain.join(" → ");
+}
+</script>
+
+</body>
+</html>

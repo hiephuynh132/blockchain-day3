@@ -1,51 +1,163 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8">
     <title>Blockchain Simulations</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 50px auto;
-            text-align: center;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 3em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-bottom: 40px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
         .menu-card {
-            display: inline-block;
-            width: 200px;
-            padding: 30px;
-            margin: 20px;
-            border: 2px solid #333;
-            border-radius: 10px;
+            background: white;
+            padding: 40px 30px;
+            border-radius: 20px;
             text-decoration: none;
             color: #333;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
         }
+
+        .menu-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .menu-card:hover::before {
+            transform: scaleX(1);
+        }
+
         .menu-card:hover {
-            background: #333;
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .menu-card h2 {
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            color: #2d3748;
+        }
+
+        .menu-card p {
+            color: #718096;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        .menu-card .badge {
+            display: inline-block;
+            background: #667eea;
             color: white;
-            transform: translateY(-5px);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        .pow { border-left: 5px solid #f59e0b; }
+        .pos { border-left: 5px solid #10b981; }
+        .fork { border-left: 5px solid #ef4444; }
+        .fork-pos { border-left: 5px solid #8b5cf6; }
+
+        footer {
+            text-align: center;
+            color: rgba(255,255,255,0.8);
+            margin-top: 40px;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+            
+            .menu-grid {
+                grid-template-columns: 1fr;
+                max-width: 400px;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>⛓️ Blockchain Simulations</h1>
-    <p>Choose a consensus mechanism to simulate:</p>
-    
-    <div>
-        <a href="/pow" class="menu-card">
-            <h2>⚒️ Proof of Work</h2>
-            <p>Mining simulation</p>
-        </a>
+    <div class="container">
+        <h1>Blockchain Consensus Simulator</h1>
         
-        <a href="/pos" class="menu-card">
-            <h2>🎯 Proof of Stake</h2>
-            <p>Validator selection</p>
-        </a>
-        
-        <a href="/fork" class="menu-card">
-            <h2>🔀 Fork Simulation</h2>
-            <p>Network splits</p>
-        </a>
+        <div class="menu-grid">
+            <a href="/pow" class="menu-card pow">
+                <h2>Proof of Work</h2>
+                <p>Experience mining competition with difficulty adjustment and real-time hash rate simulation</p>
+                <span class="badge">Mining</span>
+            </a>
+            
+            <a href="/pos" class="menu-card pos">
+                <h2>Proof of Stake</h2>
+                <p>Witness validator selection based on stake weight and probability distribution</p>
+                <span class="badge">Staking</span>
+            </a>
+            
+            <a href="/fork" class="menu-card fork">
+                <h2>Fork Simulation</h2>
+                <p>Observe how network splits occur and how longest chain rule resolves conflicts</p>
+                <span class="badge">PoW Fork</span>
+            </a>
+
+            <a href="/fork_pos" class="menu-card fork-pos">
+                <h2>Fork PoS</h2>
+                <p>See how stake-weighted voting resolves forks in Proof of Stake networks</p>
+                <span class="badge">PoS Fork</span>
+            </a>
+        </div>
+
+        <footer>
+            <p>Group G</p>
+        </footer>
     </div>
 </body>
 </html>

@@ -124,7 +124,7 @@
 
 <script>
 async function simulate() {
-    const res = await fetch("/fork/simulate", { method: "POST" });
+    const res = await fetch("/fork_pow/simulate", { method: "POST" });
     const data = await res.json();
 
     // ==== Node Table ====
@@ -160,7 +160,7 @@ async function simulate() {
 }
 
 async function resetSim() {
-    await fetch("/fork/reset");
+    await fetch("/fork_pow/reset");
     document.getElementById("nodeTable").innerHTML = "";
     document.getElementById("canonical").innerText = "-";
     document.getElementById("countA").innerText = "0";

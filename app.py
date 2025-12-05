@@ -43,11 +43,25 @@ class Validator:
         self.stake = stake
         self.selected = 0
 
-# Fork
+# Fork (PoW)
 class ForkBlock:
     def __init__(self, block_id, parent_id):
         self.block_id = block_id
         self.parent_id = parent_id
+
+# Fork PoS
+class PosForkBlock:
+    def __init__(self, block_id, parent_id):
+        self.block_id = block_id
+        self.parent_id = parent_id
+    
+    def __repr__(self):
+        return f"{self.block_id}(parent={self.parent_id})"
+
+class ForkValidator:
+    def __init__(self, name, stake):
+        self.name = name
+        self.stake = stake
 
 # ======================= GLOBAL STATE - POW =======================
 
@@ -84,6 +98,10 @@ fork_blocks = {}
 fork_nodes = ["Node1", "Node2", "Node3", "Node4", "Node5"]
 node_tip = {}
 canonical_chain = []
+
+# Fork PoS
+fork_pos_blocks = {}
+fork_validators = []
 
 # ======================= POW CORE =======================
 
@@ -274,6 +292,86 @@ def simulate_fork():
         "canonical_chain": canonical_chain
     }
 
+# ======================= FORK POS CORE =======================
+
+def run_pos_fork_sim():
+    global fork_pos_blocks, fork_validators
+    
+    # 1. Khởi tạo validators
+    fork_validators = [
+        ForkValidator("Val_A", 10),
+        ForkValidator("Val_B", 20),
+        ForkValidator("Val_C", 40),
+        ForkValidator("Val_D", 15),
+        ForkValidator("Val_E", 15),
+    ]
+    
+    fork_pos_blocks = {}
+    fork_pos_blocks["GEN"] = PosForkBlock("GEN", None)
+    fork_pos_blocks["A1"] = PosForkBlock("A1", "GEN")
+    fork_pos_blocks["B1"] = PosForkBlock("B1", "GEN")
+    
+    validator_rows = []
+    validator_choice = {}
+    stake_on_A = 0
+    stake_on_B = 0
+    
+    # 3. Mỗi validator "nhìn" A1/B1 với latency khác nhau rồi vote
+    for v in fork_validators:
+        latA = random.uniform(0, 1)
+        latB = random.uniform(0, 1)
+        
+        if latA < latB:
+            choice = "A1"
+            stake_on_A += v.stake
+        else:
+            choice = "B1"
+            stake_on_B += v.stake
+        
+        validator_choice[v.name] = choice
+        validator_rows.append({
+            "name": v.name,
+            "stake": v.stake,
+            "latA": latA,
+            "latB": latB,
+            "choice": choice
+        })
+    
+    # 4. Chọn canonical branch theo tổng stake
+    if stake_on_A > stake_on_B:
+        canonical_tip = "A1"
+        loser_tip = "B1"
+    elif stake_on_B > stake_on_A:
+        canonical_tip = "B1"
+        loser_tip = "A1"
+    else:
+        canonical_tip = random.choice(["A1", "B1"])
+        loser_tip = "B1" if canonical_tip == "A1" else "A1"
+    
+    canonical_chain_pos = get_chain_path(fork_pos_blocks, canonical_tip)
+    
+    # 5. Sinh thêm block C2 trên canonical branch bằng PoS (weighted random)
+    names = [v.name for v in fork_validators]
+    stakes = [v.stake for v in fork_validators]
+    chosen_validator = random.choices(names, weights=stakes, k=1)[0]
+    
+    fork_pos_blocks["C2"] = PosForkBlock("C2", canonical_tip)
+    final_chain = get_chain_path(fork_pos_blocks, "C2")
+    
+    result = {
+        "validators": validator_rows,
+        "stakeA": stake_on_A,
+        "stakeB": stake_on_B,
+        "canonical_tip": canonical_tip,
+        "loser_tip": loser_tip,
+        "canonical_chain": canonical_chain_pos,
+        "c2_validator": chosen_validator,
+        "c2_parent": canonical_tip,
+        "final_chain": final_chain
+    }
+    
+    return result
+
 # ======================= ROUTES - MAIN =======================
 
 @app.route("/")
@@ -288,9 +386,13 @@ def pow_page():
 def pos_page():
     return render_template("pos.html")
 
-@app.route("/fork")
+@app.route("/fork_pow")
 def fork_page():
-    return render_template("fork.html")
+    return render_template("fork_pow.html")
+
+@app.route("/fork_pos")
+def fork_pos_page():
+    return render_template("fork_pos.html")
 
 # ======================= ROUTES - POW =======================
 
@@ -412,12 +514,12 @@ def pos_reset():
 
 # ======================= ROUTES - FORK =======================
 
-@app.route("/fork/simulate", methods=["POST"])
+@app.route("/fork_pow/simulate", methods=["POST"])
 def fork_simulate():
     result = simulate_fork()
     return jsonify(result)
 
-@app.route("/fork/reset")
+@app.route("/fork_pow/reset")
 def fork_reset():
     global fork_blocks, node_tip, canonical_chain
     fork_blocks = {}
@@ -425,7 +527,21 @@ def fork_reset():
     canonical_chain = []
     return jsonify({"status": "reset OK"})
 
+# ======================= ROUTES - FORK POS =======================
+
+@app.route("/fork_pos/simulate", methods=["POST"])
+def fork_pos_simulate():
+    result = run_pos_fork_sim()
+    return jsonify(result)
+
+@app.route("/fork_pos/reset")
+def fork_pos_reset():
+    global fork_pos_blocks, fork_validators
+    fork_pos_blocks = {}
+    fork_validators = []
+    return jsonify({"status": "reset OK"})
+
 # ======================= RUN =======================
 
 if __name__ == "__main__":
-    app.run(port=8888, threaded=True)
+    app.run(debug=True, threaded=True)
