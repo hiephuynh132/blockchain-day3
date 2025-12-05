@@ -63,3 +63,15 @@ Dự án cung cấp 3 mô-đun Python độc lập mô phỏng các cơ chế đ
 ### **Thiết kế dự án**
 - Mỗi module chạy độc lập.
 - Tương thích Python ≥ 3.8.
+
+## 3. Hướng dẫn chạy
+
+```
+pip install -r requirements.txt
+```
+
+```
+python app.py
+```
+
+Truy cập http://127.0.0.1:8888/ để sử dụng

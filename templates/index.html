@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Blockchain Simulations</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            text-align: center;
+        }
+        .menu-card {
+            display: inline-block;
+            width: 200px;
+            padding: 30px;
+            margin: 20px;
+            border: 2px solid #333;
+            border-radius: 10px;
+            text-decoration: none;
+            color: #333;
+            transition: all 0.3s;
+        }
+        .menu-card:hover {
+            background: #333;
+            color: white;
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body>
+    <h1>⛓️ Blockchain Simulations</h1>
+    <p>Choose a consensus mechanism to simulate:</p>
+    
+    <div>
+        <a href="/pow" class="menu-card">
+            <h2>⚒️ Proof of Work</h2>
+            <p>Mining simulation</p>
+        </a>
+        
+        <a href="/pos" class="menu-card">
+            <h2>🎯 Proof of Stake</h2>
+            <p>Validator selection</p>
+        </a>
+        
+        <a href="/fork" class="menu-card">
+            <h2>🔀 Fork Simulation</h2>
+            <p>Network splits</p>
+        </a>
+    </div>
+</body>
+</html>

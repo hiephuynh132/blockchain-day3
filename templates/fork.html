@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Fork Resolution - Longest Chain Rule</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #f8fafc;
+            color: #0f172a;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #1d4ed8;
+        }
+
+        button {
+            padding: 10px 18px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        h2 {
+            margin-top: 25px;
+            color: #1e293b;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        th, td {
+            border: 1px solid #cbd5f5;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background: #e0e7ff;
+            color: #1e3a8a;
+        }
+
+        tr:nth-child(even) {
+            background: #f1f5f9;
+        }
+
+        .card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .chain {
+            font-weight: bold;
+            background: #dcfce7;
+            padding: 10px;
+            border-radius: 8px;
+            color: #166534;
+        }
+
+        .bad {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>🌿 Fork Resolution – Longest Chain Rule</h1>
+
+<button onclick="simulate()">Simulate Fork</button>
+<button onclick="resetSim()">Reset</button>
+
+<div class="card">
+    <h2>🌐 Network Latency & Node Choice</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Node</th>
+                <th>Latency A1</th>
+                <th>Latency B1</th>
+                <th>Picked</th>
+            </tr>
+        </thead>
+        <tbody id="nodeTable"></tbody>
+    </table>
+</div>
+
+<div class="card">
+    <h2>📊 Fork State</h2>
+    <p><b>A1 supporters:</b> <span id="countA">0</span></p>
+    <p><b>B1 supporters:</b> <span id="countB">0</span></p>
+    <p><b>Block C2 attached to:</b> <span id="c2Parent">-</span></p>
+</div>
+
+<div class="card">
+    <h2>📏 Chain Length</h2>
+    <p>Chain A tip: <b><span id="tipA">-</span></b> | Length: <b><span id="lenA">0</span></b></p>
+    <p>Chain B tip: <b><span id="tipB">-</span></b> | Length: <b><span id="lenB">0</span></b></p>
+</div>
+
+<div class="card">
+    <h2>✅ Canonical Chain</h2>
+    <div id="canonical" class="chain">-</div>
+</div>
+
+<script>
+async function simulate() {
+    const res = await fetch("/fork/simulate", { method: "POST" });
+    const data = await res.json();
+
+    // ==== Node Table ====
+    const table = document.getElementById("nodeTable");
+    table.innerHTML = "";
+
+    Object.keys(data.nodes).forEach(n => {
+        const row = data.nodes[n];
+        table.innerHTML += `
+            <tr>
+                <td>${n}</td>
+                <td>${row.latA.toFixed(3)}</td>
+                <td>${row.latB.toFixed(3)}</td>
+                <td><b>${row.picked}</b></td>
+            </tr>
+        `;
+    });
+
+    // ==== Fork Stats ====
+    document.getElementById("countA").innerText = data.countA;
+    document.getElementById("countB").innerText = data.countB;
+    document.getElementById("c2Parent").innerText = data.C2_parent;
+
+    document.getElementById("tipA").innerText = data.chainA_tip;
+    document.getElementById("tipB").innerText = data.chainB_tip;
+
+    document.getElementById("lenA").innerText = data.lenA;
+    document.getElementById("lenB").innerText = data.lenB;
+
+    // ==== Canonical Chain ====
+    document.getElementById("canonical").innerText =
+        data.canonical_chain.join(" → ");
+}
+
+async function resetSim() {
+    await fetch("/fork/reset");
+    document.getElementById("nodeTable").innerHTML = "";
+    document.getElementById("canonical").innerText = "-";
+    document.getElementById("countA").innerText = "0";
+    document.getElementById("countB").innerText = "0";
+    document.getElementById("c2Parent").innerText = "-";
+    document.getElementById("tipA").innerText = "-";
+    document.getElementById("tipB").innerText = "-";
+    document.getElementById("lenA").innerText = "0";
+    document.getElementById("lenB").innerText = "0";
+}
+</script>
+
+</body>
+</html>

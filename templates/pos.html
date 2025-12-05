@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Proof of Stake Simulator</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #f8fafc;
+            color: #0f172a;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #1d4ed8;
+        }
+
+        button {
+            padding: 10px 18px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        button.auto100 {
+            background: #7c3aed;
+        }
+
+        button.auto100:hover {
+            background: #6d28d9;
+        }
+
+        button.reset {
+            background: #dc2626;
+        }
+
+        button.reset:hover {
+            background: #b91c1c;
+        }
+
+        h2 {
+            margin-top: 30px;
+            color: #1e293b;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        th, td {
+            border: 1px solid #cbd5f5;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background: #e0e7ff;
+            color: #1e3a8a;
+        }
+
+        tr:nth-child(even) {
+            background: #f1f5f9;
+        }
+
+        .box {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>⚡ Proof of Stake (PoS) Simulator – Light Mode</h1>
+
+<button onclick="step()">Tạo 1 Slot</button>
+<button onclick="autoRun()">Auto 10 Slot</button>
+<button class="auto100" onclick="auto100()">⚡ Auto 100 Slot</button>
+<button class="reset" onclick="resetChain()">Reset</button>
+
+<div class="box">
+    <!-- VALIDATOR STATS -->
+    <div class="card">
+        <h2>📊 Validator Statistics</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Validator</th>
+                    <th>Stake</th>
+                    <th>Selected</th>
+                    <th>%</th>
+                </tr>
+            </thead>
+            <tbody id="validatorTable"></tbody>
+        </table>
+    </div>
+
+    <!-- BLOCKCHAIN -->
+    <div class="card">
+        <h2>⛓️ Blockchain</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Height</th>
+                    <th>Validator</th>
+                    <th>Time</th>
+                    <th>Hash</th>
+                </tr>
+            </thead>
+            <tbody id="blockTable"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+async function step() {
+    await fetch("/pos/step", { method: "POST" });
+    refresh();
+}
+
+async function autoRun() {
+    await fetch("/pos/auto", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slots: 10 })
+    });
+    refresh();
+}
+
+async function auto100() {
+    await fetch("/pos/auto100", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+    });
+    refresh();
+}
+
+async function resetChain() {
+    await fetch("/pos/reset");
+    document.getElementById("validatorTable").innerHTML = "";
+    document.getElementById("blockTable").innerHTML = "";
+}
+
+async function refresh() {
+    const res = await fetch("/pos/status");
+    const data = await res.json();
+
+    // ==== Validators ====
+    const vTable = document.getElementById("validatorTable");
+    vTable.innerHTML = "";
+
+    data.validators.forEach(v => {
+        vTable.innerHTML += `
+            <tr>
+                <td>${v.name}</td>
+                <td>${v.stake}</td>
+                <td>${v.selected}</td>
+                <td>${v.percentage}%</td>
+            </tr>
+        `;
+    });
+
+    // ==== Blockchain ====
+    const bTable = document.getElementById("blockTable");
+    bTable.innerHTML = "";
+
+    data.blockchain.forEach(b => {
+        bTable.innerHTML += `
+            <tr>
+                <td>${b.height}</td>
+                <td>${b.validator}</td>
+                <td>${b.timestamp}</td>
+                <td>${b.hash.substring(0, 30)}...</td>
+            </tr>
+        `;
+    });
+}
+
+setInterval(refresh, 1000);
+</script>
+
+</body>
+</html>

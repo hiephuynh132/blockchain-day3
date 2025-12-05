@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Parallel PoW Mining</title>
+    <style>
+        body { 
+            font-family: Arial; 
+            background: #f8fafc; 
+            color: #111; 
+            padding: 20px; 
+        }
+        button { 
+            padding: 10px 20px; 
+            margin-right: 8px; 
+            cursor: pointer; 
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            background: #ffffff;
+        }
+        button:hover { background: #e2e8f0; }
+
+        .miners {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .miner-box {
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 10px;
+            background: #ffffff;
+        }
+
+        .miner-title {
+            text-align: center;
+            font-weight: bold;
+            background: #e2e8f0;
+            padding: 8px;
+            border-radius: 5px;
+        }
+
+        .stat {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+            background: #ffffff;
+        }
+
+        th, td {
+            border: 1px solid #cbd5e1;
+            padding: 6px;
+            text-align: center;
+        }
+
+        th { 
+            background: #e2e8f0; 
+            font-weight: bold; 
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>⛏️ Parallel Proof of Work Mining</h1>
+
+<button onclick="start()">Start Auto Mining</button>
+<button onclick="stop()">Stop</button>
+<button onclick="reset()">Reset</button>
+
+<div class="miners" id="minerBox"></div>
+
+<h2>⛓️ Blockchain</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Height</th>
+            <th>Miner</th>
+            <th>Difficulty</th>
+            <th>Nonce</th>
+            <th>Attempts</th>
+            <th>Time</th>
+            <th>Hash</th>
+        </tr>
+    </thead>
+    <tbody id="chainTable"></tbody>
+</table>
+
+<script>
+async function start() { await fetch("/pow/start"); }
+async function stop()  { await fetch("/pow/stop");  }
+async function reset() {
+    await fetch("/pow/reset");
+    document.getElementById("chainTable").innerHTML = "";
+}
+
+async function refresh() {
+    const res = await fetch("/pow/status");
+    const data = await res.json();
+
+    const minerBox = document.getElementById("minerBox");
+    minerBox.innerHTML = "";
+
+    data.miners.forEach(m => {
+        minerBox.innerHTML += `
+            <div class="miner-box">
+                <div class="miner-title">${m.name}</div>
+                <div class="stat">Status: ${m.status}</div>
+                <div class="stat">Attempts: ${m.attempts}</div>
+            </div>
+        `;
+    });
+
+    const table = document.getElementById("chainTable");
+    table.innerHTML = "";
+
+    data.blockchain.forEach(b => {
+        table.innerHTML += `
+            <tr>
+                <td>${b.height}</td>
+                <td>${b.miner}</td>
+                <td>${b.difficulty}</td>
+                <td>${b.nonce}</td>
+                <td>${b.attempts}</td>
+                <td>${b.time}</td>
+                <td>${b.hash.substring(0, 24)}...</td>
+            </tr>
+        `;
+    });
+}
+
+setInterval(refresh, 500);
+</script>
+
+</body>
+</html>
