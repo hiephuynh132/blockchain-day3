@@ -137,17 +137,6 @@ def pos_fork_sim():
     print("\n⛓️ Chuỗi chính sau khi thêm C2:")
     print(f"  {' → '.join(final_chain)}")
 
-    # -----------------------------
-    # 6. Tóm tắt ý nghĩa
-    # -----------------------------
-    print("\nGiải thích nhanh:")
-    print("  - Fork xuất hiện do validators nhận 2 block A1, B1 với latency khác nhau.")
-    print("  - Mỗi validator vote cho nhánh nó thấy trước → tạo ra 2 nhánh A1 và B1.")
-    print("  - Giao thức PoS không chọn chain dài nhất như PoW,")
-    print("    mà chọn nhánh có TỔNG STAKE ủng hộ lớn hơn làm canonical branch.")
-    print("  - Block C2 tiếp tục được tạo trên canonical branch bởi 1 validator được")
-    print("    chọn theo weighted random (tỷ lệ theo stake).")
-
     return blocks, canonical_chain, final_chain
 
 
